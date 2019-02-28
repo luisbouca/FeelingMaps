@@ -1,0 +1,7 @@
+CREATE TABLE coordinate_geo SELECT OGR_FID, ST_GeomFromText(Shape), gid_0, name_0,
+gid_1, name_1, varname_1, type_1 , engtype_1,validto_1,
+gid_2, name_2, varname_2, type_2 , engtype_2,validto_2,
+gid_3, name_3, varname_3, type_3 , engtype_3,validto_3,
+gid_4, name_4, varname_4, type_4 , engtype_4,validto_4,
+gid_5, name_5, type_5 , engtype_5,region,varregion,zone
+FROM coordinates
