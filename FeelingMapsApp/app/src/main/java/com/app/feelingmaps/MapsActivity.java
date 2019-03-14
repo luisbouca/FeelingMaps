@@ -23,6 +23,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -52,7 +53,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnCameraIdleListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int MY_SOCKET_TIMEOUT_MS = 20000;
@@ -64,7 +65,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private PlaceDetectionClient mPlaceDetectionClient;
     private Context context;
     private RequestQueue requestQueue; // This is our requests queue to process our HTTP requests.
-    private LatLngBounds MAP_BOUNDS = new LatLngBounds(new LatLng(0,0),new LatLng(0,0));
+    private LatLngBounds MAP_BOUNDS = new LatLngBounds(new LatLng(0,0),new LatLng(1.0,1.0));
     private String currentAddress = "";
 
     @Override
@@ -98,7 +99,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
         hlp = new DebugHelper();
-        mMap.setOnCameraIdleListener(this);
         mMap.setMinZoomPreference(13);
         mMap.setMaxZoomPreference(20);
 
@@ -224,20 +224,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     String finalAddress = builder.toString(); //This is the complete address.
                     if(!currentAddress.equals(finalAddress)) {
                         currentAddress = finalAddress;
+                        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude()), 10);
+                        mMap.animateCamera(cameraUpdate);
                         String ip = "192.168.42.162";
                         String url = "http://" + ip + "/api/Level0/" + address1.getCountryName();
                         if (address1.getAdminArea() != null) {
-                            url += "/Level1/" + address1.getAdminArea();
+
                             if (address1.getSubAdminArea() != null) {
-                                url += "/Level2/" + address1.getSubAdminArea();
+                                url += "/Level1/" + address1.getAdminArea();
                                 if (address1.getLocality() != null) {
-                                    url += "/Level3/" + address1.getLocality();
+                                    url += "/Level2/" + address1.getSubAdminArea();
                                     if (address1.getSubLocality() != null) {
-                                        url += "/Level4/" + address1.getSubLocality();
+                                        url += "/Level3/" + address1.getLocality();
+                                        //url += "/Level4/" + address1.getSubLocality();
                                     }
                                 }
                             }
                         }
+                        Log.v("Volley",url);
                         JsonObjectRequest arrReq = new JsonObjectRequest(Request.Method.GET, url, null,
                                 new Response.Listener<JSONObject>() {
                                     @Override
@@ -279,12 +283,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                         if (higher.latitude < lon) {
                                                             higher = new LatLng(higher.latitude, lon);
                                                         }
-
                                                     }
-
                                                 }
                                                 MAP_BOUNDS = new LatLngBounds(smaller, higher);
                                                 mMap.setLatLngBoundsForCameraTarget(MAP_BOUNDS);
+                                                double grdSize =  0.05 * Math.abs((MAP_BOUNDS.northeast.latitude - MAP_BOUNDS.southwest.latitude)+ (MAP_BOUNDS.northeast.longitude - MAP_BOUNDS.southwest.longitude));
+                                                hlp.drawGrid(mMap, grdSize,MAP_BOUNDS);
 
 
                                             } else {
@@ -319,15 +323,4 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
     };
-
-    @Override
-    public void onCameraIdle() {
-        Projection projection = mMap.getProjection();
-        //double l1 = projection.getVisibleRegion().farLeft.longitude;
-        //double l2 = projection.getVisibleRegion().farRight.longitude;
-
-        double grdSize =  0.0005 * mMap.getCameraPosition().zoom;
-
-        hlp.drawDebugGrid(mMap, grdSize,MAP_BOUNDS);
-    }
 }
