@@ -64,6 +64,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private PlaceDetectionClient mPlaceDetectionClient;
     private Context context;
     private RequestQueue requestQueue; // This is our requests queue to process our HTTP requests.
+    private String addressLocation;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,6 +166,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(3000);
+        //locationRequest.setMinimumDisplacement(100); To be tested.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(MapsActivity.this,
@@ -205,36 +209,45 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             super.onLocationResult(locationResult);
             if (locationResult.getLastLocation() == null)
                 return;
-            if (currentLocation != locationResult.getLastLocation()) {
-                currentLocation = locationResult.getLastLocation();
-                Geocoder geoCoder = new Geocoder(context, Locale.getDefault()); //it is Geocoder
-                StringBuilder builder = new StringBuilder();
-                try {
-                    List<Address> address = geoCoder.getFromLocation(currentLocation.getLatitude(), currentLocation.getLongitude(), 1);
-                    Address address1 = address.get(0);
-                    int maxLines = address1.getMaxAddressLineIndex() + 1;
-                    for (int i = 0; i < maxLines; i++) {
-                        String addressStr = address1.getAddressLine(i);
-                        builder.append(addressStr);
-                        builder.append(" ");
-                    }
+            //if (currentLocation != locationResult.getLastLocation()) {
+            currentLocation = locationResult.getLastLocation();
+            Geocoder geoCoder = new Geocoder(context, Locale.getDefault()); //it is Geocoder
+            StringBuilder builder = new StringBuilder();
+            try {
+                List<Address> address = geoCoder.getFromLocation(currentLocation.getLatitude(), currentLocation.getLongitude(), 1);
+                Address address1 = address.get(0);
+                int maxLines = address1.getMaxAddressLineIndex() + 1;
+                for (int i = 0; i < maxLines; i++) {
+                    String addressStr = address1.getAddressLine(i);
+                    builder.append(addressStr);
+                    builder.append(" ");
+                }
 
-                    String finalAddress = builder.toString(); //This is the complete address.
-                    String url = "http://192.168.42.107/api/Level0/" + address1.getCountryName();
+                String finalAddress = builder.toString(); //This is the complete address.
+
+                //drodrigues 13/03/2019
+                if(addressLocation == null || !addressLocation.equals(finalAddress))
+                {
+                    addressLocation = finalAddress;
+                    String url = "http://10.0.2.2:85/api/Level0/" + address1.getCountryName();
                     if (address1.getAdminArea() != null) {
                         url += "/Level1/" + address1.getAdminArea();
+
+                        if (address1.getSubAdminArea() != null) {
+                            url += "/Level2/" + address1.getSubAdminArea();
+
+                            if (address1.getLocality() != null) {
+                                url += "/Level3/" + address1.getLocality();
+
+                                if (address1.getSubLocality() != null) {
+                                    url += "/Level4/" + address1.getSubLocality();
+                                }
+                            }
+                        }
                     }
-                    if (address1.getSubAdminArea() != null) {
-                        url += "/Level2/" + address1.getSubAdminArea();
-                    }
-                    if (address1.getLocality() != null) {
-                        url += "/Level3/" + address1.getLocality();
-                    }
-                    if (address1.getSubLocality() != null) {
-                        url += "/Level4/" + address1.getSubLocality();
-                    }
+
                     Log.e(" HELLO : ", url);
-                    JsonObjectRequest arrReq = new JsonObjectRequest(url,null,
+                    JsonObjectRequest arrReq = new JsonObjectRequest(url, null,
                             new Response.Listener<JSONObject>() {
                                 @Override
                                 public void onResponse(JSONObject response) {
@@ -243,15 +256,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         // The user does have repos, so let's loop through them all.
                                         for (int i = 0; i < response.length(); i++) {
                                             //try {
-                                                // For each repo, add a new line to our repo list.
-                                                //JSONObject jsonObj = response.getJSONObject(i);
-                                                //Log.e(" Volley ", jsonObj.toString());
-                                                //String repoName = jsonObj.get("name").toString();
-                                                //String lastUpdated = jsonObj.get("updated_at").toString();
-                                                //addToRepoList(repoName, lastUpdated);
+                                            // For each repo, add a new line to our repo list.
+                                            //JSONObject jsonObj = response.getJSONObject(i);
+                                            //Log.e(" Volley ", jsonObj.toString());
+                                            //String repoName = jsonObj.get("name").toString();
+                                            //String lastUpdated = jsonObj.get("updated_at").toString();
+                                            //addToRepoList(repoName, lastUpdated);
                                             //} catch (JSONException e) {
-                                                // If there is an error then output this to the logs.
-                                                Log.e(" Volley ", "Invalid JSON Object.");
+                                            // If there is an error then output this to the logs.
+                                            Log.e(" Volley ", "Invalid JSON Object.");
                                             //}
 
                                         }
@@ -272,13 +285,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 }
                             }
                     );
-                    arrReq.setRetryPolicy(new DefaultRetryPolicy(MY_SOCKET_TIMEOUT_MS,DefaultRetryPolicy.DEFAULT_MAX_RETRIES,DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                    arrReq.setRetryPolicy(new DefaultRetryPolicy(MY_SOCKET_TIMEOUT_MS, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
                     // Add the request we just defined to our request queue.
                     // The request queue will automatically handle the request as soon as it can.
                     requestQueue.add(arrReq);
-                } catch (IOException e) {
-                } catch (NullPointerException e) {
+
                 }
+            } catch (IOException e) {
+                System.out.println("ERROR:"+e.getMessage());
+            } catch (NullPointerException e) {
+                System.out.println("ERROR:"+e.getMessage());
             }
         }
     };
