@@ -30,7 +30,7 @@ class DebugHelper {
 
     private List<Polyline> gridLines = new ArrayList<Polyline>();
 
-    void drawDebugGrid(GoogleMap map, double clusterSize,LatLngBounds bounds) {
+    void drawGrid(GoogleMap map, double clusterSize,LatLngBounds bounds) {
         cleanup();
         double minY = -180 + clusterSize * (int) (SphericalMercator.scaleLatitude(bounds.southwest.latitude) / clusterSize);
         double minX = -180 + clusterSize * (int) (SphericalMercator.scaleLongitude(bounds.southwest.longitude) / clusterSize);
