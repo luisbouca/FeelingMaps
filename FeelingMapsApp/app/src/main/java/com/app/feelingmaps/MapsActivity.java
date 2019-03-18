@@ -53,7 +53,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnCameraIdleListener {
 
     private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int MY_SOCKET_TIMEOUT_MS = 20000;
@@ -66,6 +66,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Context context;
     private RequestQueue requestQueue; // This is our requests queue to process our HTTP requests.
     private LatLngBounds MAP_BOUNDS = new LatLngBounds(new LatLng(0,0),new LatLng(1.0,1.0));
+    private LatLngBounds SCREEN_BOUNDS = new LatLngBounds(new LatLng(0,0),new LatLng(1.0,1.0));
     private String currentAddress = "";
 
     @Override
@@ -99,6 +100,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
         hlp = new DebugHelper();
+        mMap.setOnCameraIdleListener(this);
         mMap.setMinZoomPreference(13);
         mMap.setMaxZoomPreference(20);
 
@@ -287,8 +289,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                 }
                                                 MAP_BOUNDS = new LatLngBounds(smaller, higher);
                                                 mMap.setLatLngBoundsForCameraTarget(MAP_BOUNDS);
-                                                double grdSize =  0.05 * Math.abs((MAP_BOUNDS.northeast.latitude - MAP_BOUNDS.southwest.latitude)+ (MAP_BOUNDS.northeast.longitude - MAP_BOUNDS.southwest.longitude));
-                                                hlp.drawGrid(mMap, grdSize,MAP_BOUNDS);
+
+                                                double avgX = (MAP_BOUNDS.northeast.longitude -  MAP_BOUNDS.southwest.longitude);
+                                                double avgY = (MAP_BOUNDS.northeast.latitude -  MAP_BOUNDS.southwest.latitude);
+                                                double avg = (avgX + avgY) /2;
+                                                float min = (float) (avg*100)-3;
+                                                float max = (float) (avg*100)+5;
+                                                mMap.setMinZoomPreference(min);
+                                                mMap.setMaxZoomPreference(max);
+
+                                                hlp.drawGrid(mMap,MAP_BOUNDS,SCREEN_BOUNDS);
 
 
                                             } else {
@@ -323,4 +333,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
     };
+
+    @Override
+    public void onCameraIdle() {
+        Projection projection = mMap.getProjection();
+
+        SCREEN_BOUNDS = projection.getVisibleRegion().latLngBounds;
+
+        hlp.drawGrid(mMap,MAP_BOUNDS,SCREEN_BOUNDS);
+    }
 }
