@@ -16,10 +16,14 @@ package com.app.feelingmaps;
  * limitations under the License.
  */
 
+import android.util.Log;
+
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -28,40 +32,77 @@ import java.util.List;
 
 class DebugHelper {
 
-    private List<Polyline> gridLines = new ArrayList<Polyline>();
+    private List<PolygonCustom> gridBlocks = new ArrayList<PolygonCustom>();
 
-    void drawGrid(GoogleMap map, double clusterSize,LatLngBounds bounds) {
+    void drawGrid(GoogleMap map,LatLngBounds bounds,LatLngBounds screen) {
         cleanup();
-        double minY = -180 + clusterSize * (int) (SphericalMercator.scaleLatitude(bounds.southwest.latitude) / clusterSize);
-        double minX = -180 + clusterSize * (int) (SphericalMercator.scaleLongitude(bounds.southwest.longitude) / clusterSize);
-        double maxY = -180 + clusterSize * (int) (SphericalMercator.scaleLatitude(bounds.northeast.latitude) / clusterSize);
-        double maxX = -180 + clusterSize * (int) (SphericalMercator.scaleLongitude(bounds.northeast.longitude) / clusterSize);
 
-        for (double y = minY; y <= maxY; y += clusterSize) {
-            gridLines.add(map.addPolyline(new PolylineOptions().width(1.0f).add(new LatLng(SphericalMercator.toLatitude(y), bounds.southwest.longitude),
-                    new LatLng(SphericalMercator.toLatitude(y), bounds.northeast.longitude))));
+
+        double minY = bounds.southwest.latitude;
+        double minX = bounds.southwest.longitude;
+        double maxY = bounds.northeast.latitude;
+        double maxX = bounds.northeast.longitude;
+
+        boolean done = false;
+        while(!done){
+            done = true;
+            if(minY>90){
+                minY-=180;
+                done = false;
+            }else if(minY<-90){
+                minY+=180;
+                done = false;
+            }
+            if(maxY>90){
+                maxY-=180;
+                done = false;
+            }else if(maxY<-90){
+                maxY+=180;
+                done = false;
+            }
+
+            if(minX>180){
+                minX-=360;
+                done = false;
+            }else if(minX<-180){
+                minX+=360;
+                done = false;
+            }
+            if(maxX>180){
+                maxX-=360;
+                done = false;
+            }else if(maxX<-180){
+                maxX+=360;
+                done = false;
+            }
         }
-        if (minX <= maxX) {
-            for (double x = minX; x <= maxX; x += clusterSize) {
-                gridLines.add(map.addPolyline(new PolylineOptions().width(1.0f).add(new LatLng(bounds.southwest.latitude, x),
-                        new LatLng(bounds.northeast.latitude, x))));
+
+        double avgY = maxY-minY;
+        double avgX =  maxX - minX;
+        double clusterSizeX = (avgX * avgX)/6;
+        double clusterSizeY = (avgY * avgY)/6;
+        int i = 0;
+        int maxJ = (int) Math.round(avgX/clusterSizeY);
+        for(double y = minY;y+clusterSizeY<=maxY;y=y+clusterSizeY){
+            int j = 0;
+            for(double x = minX;x+clusterSizeX<=maxX;x=x+clusterSizeX){
+                PolygonOptions newPolygon = new PolygonOptions().strokeWidth(2.0f).add(new LatLng(y,x)).add(new LatLng(y+clusterSizeY,x)).add(new LatLng(y+clusterSizeY,x+clusterSizeX)).add(new LatLng(y,x+clusterSizeX));
+                if(screen.contains(new LatLng(y,x)) || screen.contains(new LatLng(y+clusterSizeY,x+clusterSizeX))) {
+                    gridBlocks.add(new PolygonCustom(map.addPolygon(newPolygon), (maxJ * i) + j));
+                }
+                j++;
             }
-        } else {
-            for (double x = -180; x <= minX; x += clusterSize) {
-                gridLines.add(map.addPolyline(new PolylineOptions().width(1.0f).add(new LatLng(bounds.southwest.latitude, x),
-                        new LatLng(bounds.northeast.latitude, x))));
-            }
-            for (double x = maxX; x < 180; x += clusterSize) {
-                gridLines.add(map.addPolyline(new PolylineOptions().width(1.0f).add(new LatLng(bounds.southwest.latitude, x),
-                        new LatLng(bounds.northeast.latitude, x))));
-            }
+            i++;
         }
+
+
     }
 
     void cleanup() {
-        for (Polyline polyline : gridLines) {
-            polyline.remove();
+
+        for (PolygonCustom polygon : gridBlocks) {
+            polygon.remove();
         }
-        gridLines.clear();
+        gridBlocks.clear();
     }
 }
