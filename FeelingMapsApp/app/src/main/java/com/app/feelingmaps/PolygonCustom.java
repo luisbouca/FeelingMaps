@@ -14,4 +14,14 @@ public class PolygonCustom {
     public void remove() {
         area.remove();
     }
+
+    @Override
+    public boolean equals(Object area2){
+        if(area2.getClass() == area.getClass()){
+            if(area2.equals(area)){
+                return true;
+            }
+        }
+        return false;
+    }
 }

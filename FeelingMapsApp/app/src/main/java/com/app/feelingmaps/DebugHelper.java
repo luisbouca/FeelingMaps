@@ -16,16 +16,11 @@ package com.app.feelingmaps;
  * limitations under the License.
  */
 
-import android.util.Log;
-
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +29,7 @@ class DebugHelper {
 
     private List<PolygonCustom> gridBlocks = new ArrayList<PolygonCustom>();
 
-    void drawGrid(GoogleMap map,LatLngBounds bounds,LatLngBounds screen) {
+    void drawGrid(GoogleMap map, LatLngBounds bounds, LatLngBounds screen) {
         cleanup();
 
 
@@ -87,6 +82,7 @@ class DebugHelper {
             int j = 0;
             for(double x = minX;x+clusterSizeX<=maxX;x=x+clusterSizeX){
                 PolygonOptions newPolygon = new PolygonOptions().strokeWidth(2.0f).add(new LatLng(y,x)).add(new LatLng(y+clusterSizeY,x)).add(new LatLng(y+clusterSizeY,x+clusterSizeX)).add(new LatLng(y,x+clusterSizeX));
+                newPolygon.clickable(true);
                 if(screen.contains(new LatLng(y,x)) || screen.contains(new LatLng(y+clusterSizeY,x+clusterSizeX))) {
                     gridBlocks.add(new PolygonCustom(map.addPolygon(newPolygon), (maxJ * i) + j));
                 }
@@ -94,6 +90,16 @@ class DebugHelper {
             }
             i++;
         }
+        map.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener(){
+            public void onPolygonClick(Polygon polygon) {
+                for(int i = 0 ; i<gridBlocks.size();i++){
+                    if(gridBlocks.get(i).equals(polygon)){
+                        int id = gridBlocks.get(i).id;
+                    }
+                }
+
+            }
+        });
 
 
     }

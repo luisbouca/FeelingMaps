@@ -228,16 +228,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         currentAddress = finalAddress;
                         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude()), 10);
                         mMap.animateCamera(cameraUpdate);
-                        String ip = "192.168.42.162";
+                        String ip = "192.168.42.92:85";
+                        //String ip = "10.0.2.2:85";
                         String url = "http://" + ip + "/api/Level0/" + address1.getCountryName();
                         if (address1.getAdminArea() != null) {
-
-                            if (address1.getSubAdminArea() != null) {
-                                url += "/Level1/" + address1.getAdminArea();
-                                if (address1.getLocality() != null) {
-                                    url += "/Level2/" + address1.getSubAdminArea();
+                            url += "/Level1/" + address1.getAdminArea();
+                            if (address1.getLocality() != null) {
+                                url += "/Level2/" + address1.getLocality();
+                                if (address1.getSubAdminArea() != null) {
+                                    url += "/Level3/" + address1.getSubAdminArea();
                                     if (address1.getSubLocality() != null) {
-                                        url += "/Level3/" + address1.getLocality();
+
                                         //url += "/Level4/" + address1.getSubLocality();
                                     }
                                 }
