@@ -51,5 +51,33 @@ router.get('/Level0/:level0/Level1/:level1', function(req, res, next) {
 	});
 });
 
+router.get("/Comments/:cityid/:id/All",(req,res,next)=>{
+	query="SELECT * from classificacao where idCidadeZona=(Select id from cidade_zona where idCidade='"+req.params.cityid+"' and idZona='"+req.params.id+"')"
+	res.locals.connection.query(query, function (error, results, fields) {
+		if (error) throw error;
+		if(JSON.stringify(results) != "[]"){
+			console.log(query)
+			res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
+		}else{
+			res.send(JSON.stringify({"status": 200, "error": null, "response": "Not Found"}))
+		}
+	});
+})
+
+router.post("/Comments/",(req,res,next)=>{
+
+	console.log(req.body)
+	query="Insert Into classificacao (idCidadeZona,idUser,comentario,classificacao) Values((Select id from cidade_zona where idCidade="+req.body.cityId+" and idzona="+req.body.id+"),"+req.body.user+","+req.body.comment+","+req.body.rating+")"
+	res.locals.connection.query(query, function (error, results, fields) {
+		if (error) throw error;
+		if(JSON.stringify(results) != "[]"){
+			console.log(query)
+			res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
+		}else{
+			res.send(JSON.stringify({"status": 200, "error": null, "response": "Not Found"}))
+		}
+	});
+})
+
 
 module.exports = router;

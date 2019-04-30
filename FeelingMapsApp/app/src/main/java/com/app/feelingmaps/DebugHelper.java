@@ -16,6 +16,10 @@ package com.app.feelingmaps;
  * limitations under the License.
  */
 
+import android.content.Context;
+import android.content.Intent;
+
+import com.android.volley.RequestQueue;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -29,7 +33,7 @@ class DebugHelper {
 
     private List<PolygonCustom> gridBlocks = new ArrayList<PolygonCustom>();
 
-    void drawGrid(GoogleMap map, LatLngBounds bounds, LatLngBounds screen) {
+    void drawGrid(GoogleMap map, LatLngBounds bounds, LatLngBounds screen, final Context context, final String cityId) {
         cleanup();
 
 
@@ -95,6 +99,10 @@ class DebugHelper {
                 for(int i = 0 ; i<gridBlocks.size();i++){
                     if(gridBlocks.get(i).equals(polygon)){
                         int id = gridBlocks.get(i).id;
+                        Intent intent = new Intent(context,ClassifyCommentsActivity.class);
+                        intent.putExtra("id",id);
+                        intent.putExtra("cityId",cityId);
+                        context.startActivity(intent);
                     }
                 }
 

@@ -68,6 +68,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LatLngBounds MAP_BOUNDS = new LatLngBounds(new LatLng(0,0),new LatLng(1.0,1.0));
     private LatLngBounds SCREEN_BOUNDS = new LatLngBounds(new LatLng(0,0),new LatLng(1.0,1.0));
     private String currentAddress = "";
+    private String cityId = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -228,9 +229,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         currentAddress = finalAddress;
                         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude()), 10);
                         mMap.animateCamera(cameraUpdate);
-                        String ip = "192.168.42.92:85";
-                        //String ip = "10.0.2.2:85";
-                        String url = "http://" + ip + "/api/Level0/" + address1.getCountryName();
+                        String url = getResources().getString(R.string.ip)  + "/api/Level0/" + address1.getCountryName();
                         if (address1.getAdminArea() != null) {
                             url += "/Level1/" + address1.getAdminArea();
                             if (address1.getLocality() != null) {
@@ -265,6 +264,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                 LatLng higher = new LatLng(lat, lon);
                                                 for (int localNum = 0; localNum < locals.length(); localNum++) {
                                                     local = locals.getJSONObject(localNum);
+                                                    if(cityId == ""){
+                                                        cityId = local.getString("OGR_FID");
+                                                    }
                                                     points = local.getJSONArray("ST_GeomFromText(Shape)");
                                                     pointarray = points.getJSONArray(0);
                                                     for (int pointNum = 0; pointNum < pointarray.length(); pointNum++) {
@@ -299,7 +301,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                 mMap.setMinZoomPreference(min);
                                                 mMap.setMaxZoomPreference(max);
 
-                                                hlp.drawGrid(mMap,MAP_BOUNDS,SCREEN_BOUNDS);
+                                                hlp.drawGrid(mMap,MAP_BOUNDS,SCREEN_BOUNDS,getApplication(),cityId);
 
 
                                             } else {
@@ -341,6 +343,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         SCREEN_BOUNDS = projection.getVisibleRegion().latLngBounds;
 
-        hlp.drawGrid(mMap,MAP_BOUNDS,SCREEN_BOUNDS);
+        hlp.drawGrid(mMap,MAP_BOUNDS,SCREEN_BOUNDS,getApplication(),cityId);
     }
 }
