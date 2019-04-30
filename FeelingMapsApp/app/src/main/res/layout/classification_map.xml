@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:customfont="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="false" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:background="@android:color/white"
+        android:orientation="vertical"
+        android:padding="10dp" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Classificação" />
+
+                <RatingBar
+                    android:id="@+id/MyRating"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:isIndicator="false"
+                    style="?android:attr/ratingBarStyleIndicator" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textView5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Categorias" />
+
+                <Spinner
+                    android:id="@+id/spinner2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Comentario" />
+
+            <ScrollView
+                android:id="@+id/ScrollView01"
+                android:layout_width="match_parent"
+                android:layout_height="100dp">
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </ScrollView>
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ListView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+            </ScrollView>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>
