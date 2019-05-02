@@ -51,5 +51,53 @@ router.get('/Level0/:level0/Level1/:level1', function(req, res, next) {
 	});
 });
 
+router.get('/Email/:email/Password/:password', function(req, res, next) {
+	query="SELECT CASE WHEN EXISTS(SELECT * FROM user WHERE email like '"+req.params.email+"'  and password like '"+req.params.password+"') THEN 1 ELSE 0 END AS 'authentication'"
+	res.locals.connection.query(query, function (error, results, fields) {
+		if (error) throw error;
+		if(JSON.stringify(results) != "[]"){
+			console.log(query)
+			res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
+		}else{
+			res.send(JSON.stringify({"status": 200, "error": null, "response": "Not Found"}))
+		}
+	});
+});
+
+router.get('/Email/:email/Name/:name', function(req, res, next) {
+	query="SELECT CASE WHEN EXISTS(SELECT * FROM user WHERE email like '"+req.params.email+"' OR name like '"+req.params.name+"') THEN 1 ELSE 0 END AS 'registered'"
+	res.locals.connection.query(query, function (error, results, fields) {
+		if (error) throw error;
+		if(JSON.stringify(results) != "[]"){
+			console.log(query)
+			res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
+		}else{
+			res.send(JSON.stringify({"status": 200, "error": null, "response": "Not Found"}))
+		}
+	});
+});
+
+
+
+router.get('/Name/:name/Email/:email/Password/:password', function(req, res, next) {
+	query="INSERT INTO user (name, email, password) VALUES('"+req.params.name+"', '"+req.params.email+"', '"+req.params.password+"')"
+	res.locals.connection.query(query, function (error, results, fields) {
+		if (error) throw error;
+		if(JSON.stringify(results) != "[]"){
+			console.log(query)
+			res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
+		}else{
+			res.send(JSON.stringify({"status": 200, "error": null, "response": "Not Found"}))
+		}
+	});
+});
+
+
+
+
+
+
+
+
 
 module.exports = router;
