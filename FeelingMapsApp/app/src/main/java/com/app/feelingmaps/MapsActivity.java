@@ -103,7 +103,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         hlp = new DebugHelper();
         mMap.setOnCameraIdleListener(this);
         mMap.setMinZoomPreference(13);
-        mMap.setMaxZoomPreference(20);
+        mMap.setMaxZoomPreference(17);
 
         mMap.moveCamera(CameraUpdateFactory.newLatLng(center));
 
@@ -227,7 +227,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     String finalAddress = builder.toString(); //This is the complete address.
                     if(!currentAddress.equals(finalAddress)) {
                         currentAddress = finalAddress;
-                        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude()), 10);
+                        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude()), 15);
                         mMap.animateCamera(cameraUpdate);
                         String url = getResources().getString(R.string.ip)  + "/api/Level0/" + address1.getCountryName();
                         if (address1.getAdminArea() != null) {
@@ -297,7 +297,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                 double avgY = (MAP_BOUNDS.northeast.latitude -  MAP_BOUNDS.southwest.latitude);
                                                 double avg = (avgX + avgY) /2;
                                                 float min = (float) (avg*100)-3;
-                                                float max = (float) (avg*100)+5;
+                                                float max = (float) (avg*100)+3;
                                                 mMap.setMinZoomPreference(min);
                                                 mMap.setMaxZoomPreference(max);
 
