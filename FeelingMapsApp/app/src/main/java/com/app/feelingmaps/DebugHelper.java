@@ -21,10 +21,16 @@ import android.content.Intent;
 
 import com.android.volley.RequestQueue;
 import com.google.android.gms.maps.GoogleMap;
-import android.util.Log;
-
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.Projection;
+import android.graphics.Point;
+import android.view.Display;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.ArrayAdapter;
+import android.widget.PopupWindow;
+import android.widget.Spinner;
+import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Polygon;
@@ -33,11 +39,16 @@ import com.google.android.gms.maps.model.PolygonOptions;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.content.Context.LAYOUT_INFLATER_SERVICE;
+
 class DebugHelper {
+
+
+
 
     private List<PolygonCustom> gridBlocks = new ArrayList<PolygonCustom>();
 
-    void drawGrid(GoogleMap map, LatLngBounds bounds, LatLngBounds screen, final Context context, final String cityId) {
+    void drawGrid(GoogleMap map, LatLngBounds bounds, LatLngBounds screen, final Context context,final View anchorview, final String cityId) {
         cleanup();
 
 
@@ -103,10 +114,45 @@ class DebugHelper {
                 for(int i = 0 ; i<gridBlocks.size();i++){
                     if(gridBlocks.get(i).equals(polygon)){
                         int id = gridBlocks.get(i).id;
-                        Intent intent = new Intent(context,ClassifyCommentsActivity.class);
+                        /*Intent intent = new Intent(context,ClassifyCommentsActivity.class);
                         intent.putExtra("id",id);
                         intent.putExtra("cityId",cityId);
-                        context.startActivity(intent);
+                        context.startActivity(intent);*/
+                        Toast.makeText(context.getApplicationContext(), "This is my Toast message!",
+                                Toast.LENGTH_LONG).show();
+
+                        LayoutInflater inflater = (LayoutInflater)
+                                context.getSystemService(LAYOUT_INFLATER_SERVICE);
+                        View popupView = inflater.inflate(R.layout.classification_map, null);
+
+                        //get the spinner from the xml.
+                        Spinner dropdown = popupView.findViewById(R.id.spinner2);
+//create a list of items for the spinner.
+                        String[] items = new String[]{"1", "2", "three"};
+//create an adapter to describe how the items are displayed, adapters are used in several places in android.
+//There are multiple variations of this, but this is the basic variant.
+                        ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item, items);
+//set the spinners adapter to the previously created one.
+                        dropdown.setAdapter(adapter);
+
+                        // create the popup window
+                        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+                        Display display = wm.getDefaultDisplay();
+                        Point size = new Point();
+                        display.getSize(size);
+
+                        int height = (size.y)/2+250;
+                                int width =(size.x)/2+400;
+                        boolean focusable = true; // lets taps outside the popup also dismiss it
+                        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+
+                        // show the popup window
+                        // which view you pass in doesn't matter, it is only used for the window tolken
+                        popupWindow.showAtLocation(anchorview, Gravity.CENTER, 0, 0);
+
+
+
+
                     }
                 }
 

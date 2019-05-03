@@ -10,8 +10,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -70,6 +72,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String currentAddress = "";
     private String cityId = "";
 
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,6 +85,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
         context = this;
         requestQueue = Volley.newRequestQueue(this); // This setups up a new request queue which we will need to make HTTP requests.
+
+
     }
 
 
@@ -301,7 +308,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                 mMap.setMinZoomPreference(min);
                                                 mMap.setMaxZoomPreference(max);
 
-                                                hlp.drawGrid(mMap,MAP_BOUNDS,SCREEN_BOUNDS,getApplication(),cityId);
+                                                hlp.drawGrid(mMap,MAP_BOUNDS,SCREEN_BOUNDS,getApplication(),findViewById(R.id.map),cityId);
 
 
                                             } else {
@@ -343,6 +350,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         SCREEN_BOUNDS = projection.getVisibleRegion().latLngBounds;
 
-        hlp.drawGrid(mMap,MAP_BOUNDS,SCREEN_BOUNDS,getApplication(),cityId);
+        hlp.drawGrid(mMap,MAP_BOUNDS,SCREEN_BOUNDS,getApplication(),findViewById(R.id.map),cityId);
     }
 }
