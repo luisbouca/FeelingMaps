@@ -226,6 +226,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     String finalAddress = builder.toString(); //This is the complete address.
                     if(!currentAddress.equals(finalAddress)) {
+                        cityId = "";
                         currentAddress = finalAddress;
                         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude()), 15);
                         mMap.animateCamera(cameraUpdate);
@@ -237,8 +238,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 if (address1.getSubAdminArea() != null) {
                                     url += "/Level3/" + address1.getSubAdminArea();
                                     if (address1.getSubLocality() != null) {
-
-                                        //url += "/Level4/" + address1.getSubLocality();
+                                        url += "/Level4/" + address1.getSubLocality();
                                     }
                                 }
                             }

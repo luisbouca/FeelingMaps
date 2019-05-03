@@ -62,6 +62,31 @@ router.get("/Comments/:cityid/:id/All",(req,res,next)=>{
 			res.send(JSON.stringify({"status": 200, "error": null, "response": "Not Found"}))
 		}
 	});
+});
+
+router.get('/Email/:email/Password/:password', function(req, res, next) {
+	query="SELECT CASE WHEN EXISTS(SELECT * FROM user WHERE email like '"+req.params.email+"'  and password like '"+req.params.password+"') THEN 1 ELSE 0 END AS 'authentication'"
+	res.locals.connection.query(query, function (error, results, fields) {
+		if (error) throw error;
+		if(JSON.stringify(results) != "[]"){
+			console.log(query)
+			res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
+		}else{
+			res.send(JSON.stringify({"status": 200, "error": null, "response": "Not Found"}))
+		}
+	});
+});
+router.get('/Email/:email/Name/:name', function(req, res, next) {
+	query="SELECT CASE WHEN EXISTS(SELECT * FROM user WHERE email like '"+req.params.email+"' OR name like '"+req.params.name+"') THEN 1 ELSE 0 END AS 'registered'"
+	res.locals.connection.query(query, function (error, results, fields) {
+		if (error) throw error;
+		if(JSON.stringify(results) != "[]"){
+			console.log(query)
+			res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
+		}else{
+			res.send(JSON.stringify({"status": 200, "error": null, "response": "Not Found"}))
+		}
+	})
 })
 
 router.get("/City/:cityId/:numZones",(req,res,next)=>{
@@ -77,9 +102,8 @@ router.get("/City/:cityId/:numZones",(req,res,next)=>{
 		}else{
 			res.send(JSON.stringify({"status": 200, "error": null, "response": "Not Found"}))
 		}
-	});
+	})
 })
-
 router.post("/Comments/",(req,res,next)=>{
 
 	console.log(req.body)
@@ -109,7 +133,11 @@ router.post("/Comments/",(req,res,next)=>{
 			res.send(JSON.stringify({"status": 200, "error": null, "response": "Not Found"}))
 		}
 	});
-	/*query="Insert Into classificacao (idCidadeZona,idUser,comentario,classificacao) Values((Select id from cidade_zona where idCidade="+req.body.cityId+" and idzona="+req.body.id+"),"+req.body.user+","+req.body.comment+","+req.body.rating+")"
+});
+
+router.get('/Name/:name/Email/:email/Password/:password', function(req, res, next) {
+	query="INSERT INTO user (name, email, password) VALUES('"+req.params.name+"', '"+req.params.email+"', '"+req.params.password+"')"
+
 	res.locals.connection.query(query, function (error, results, fields) {
 		if (error) throw error;
 		if(JSON.stringify(results) != "[]"){
@@ -118,8 +146,7 @@ router.post("/Comments/",(req,res,next)=>{
 		}else{
 			res.send(JSON.stringify({"status": 200, "error": null, "response": "Not Found"}))
 		}
-	});*/
-})
-
+	});
+});
 
 module.exports = router;

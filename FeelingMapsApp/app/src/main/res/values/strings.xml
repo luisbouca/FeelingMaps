@@ -6,4 +6,5 @@
     <string name="comment_title">Comentário</string>
     <string name="categories_title">Categorias</string>
     <string name="rate_button">Classificar</string>
+    <string name="title_activity_login">Login</string>
 </resources>
