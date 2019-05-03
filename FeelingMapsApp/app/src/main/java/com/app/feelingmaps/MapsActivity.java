@@ -237,6 +237,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         currentAddress = finalAddress;
                         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude()), 15);
                         mMap.animateCamera(cameraUpdate);
+                        
                         String url = getResources().getString(R.string.ip)  + "/api/Level0/" + address1.getCountryName();
                         if (address1.getAdminArea() != null) {
                             url += "/Level1/" + address1.getAdminArea();

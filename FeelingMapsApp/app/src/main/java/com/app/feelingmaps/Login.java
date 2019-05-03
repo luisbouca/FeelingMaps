@@ -107,9 +107,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener{
                 }
                 else
                 {
-
-                    String ip = "10.0.2.2:85";
-                    String url = "http://" + ip + "/api/Email/" + AESEncyption.encrypt(email.toLowerCase()) + "/Password/" + AESEncyption.encrypt(password);;
+                    String url = getResources().getString(R.string.ip) + "/api/Email/" + AESEncyption.encrypt(email.toLowerCase()) + "/Password/" + AESEncyption.encrypt(password);;
 
                     JsonObjectRequest arrReq = new JsonObjectRequest(Request.Method.GET, url, null,
                             new Response.Listener<JSONObject>() {

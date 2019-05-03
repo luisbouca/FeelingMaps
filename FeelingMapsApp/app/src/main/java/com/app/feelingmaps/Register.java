@@ -134,8 +134,7 @@ public class Register extends AppCompatActivity  implements View.OnClickListener
                 else
                 {
 
-                    String ip = "10.0.2.2:85";
-                    String url = "http://" + ip + "/api/Email/" + AESEncyption.encrypt(email.toLowerCase()) + "/Name/" + user;
+                    String url = getResources().getString(R.string.ip) + "/api/Email/" + AESEncyption.encrypt(email.toLowerCase()) + "/Name/" + user;
 
                     JsonObjectRequest arrReq = new JsonObjectRequest(Request.Method.GET, url, null,
                             new Response.Listener<JSONObject>() {
@@ -151,8 +150,7 @@ public class Register extends AppCompatActivity  implements View.OnClickListener
                                             String email = ((EditText) findViewById(R.id.txtEmail)).getText().toString();
                                             String password = ((EditText) findViewById(R.id.txtPassword)).getText().toString();
 
-                                            String ip = "10.0.2.2:85";
-                                            String url = "http://" + ip + "/api/Name/" + user + "/Email/" + AESEncyption.encrypt(email.toLowerCase())+"/Password/"+AESEncyption.encrypt(password);
+                                            String url = getResources().getString(R.string.ip) + "/api/Name/" + user + "/Email/" + AESEncyption.encrypt(email.toLowerCase())+"/Password/"+AESEncyption.encrypt(password);
 
                                             JsonObjectRequest arrReq = new JsonObjectRequest(Request.Method.GET, url, null,
                                                     new Response.Listener<JSONObject>() {
