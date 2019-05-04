@@ -28,6 +28,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.PopupWindow;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -47,6 +48,7 @@ class DebugHelper {
 
 
     private List<PolygonCustom> gridBlocks = new ArrayList<PolygonCustom>();
+    private Button button;
 
     void drawGrid(GoogleMap map, LatLngBounds bounds, LatLngBounds screen, final Context context,final View anchorview, final String cityId) {
         cleanup();
@@ -113,11 +115,8 @@ class DebugHelper {
             public void onPolygonClick(Polygon polygon) {
                 for(int i = 0 ; i<gridBlocks.size();i++){
                     if(gridBlocks.get(i).equals(polygon)){
-                        int id = gridBlocks.get(i).id;
-                        /*Intent intent = new Intent(context,ClassifyCommentsActivity.class);
-                        intent.putExtra("id",id);
-                        intent.putExtra("cityId",cityId);
-                        context.startActivity(intent);*/
+                        final int id = gridBlocks.get(i).id;
+
                         Toast.makeText(context.getApplicationContext(), "This is my Toast message!",
                                 Toast.LENGTH_LONG).show();
 
@@ -125,15 +124,7 @@ class DebugHelper {
                                 context.getSystemService(LAYOUT_INFLATER_SERVICE);
                         View popupView = inflater.inflate(R.layout.classification_map, null);
 
-                        //get the spinner from the xml.
-                        Spinner dropdown = popupView.findViewById(R.id.spinner2);
-//create a list of items for the spinner.
-                        String[] items = new String[]{"1", "2", "three"};
-//create an adapter to describe how the items are displayed, adapters are used in several places in android.
-//There are multiple variations of this, but this is the basic variant.
-                        ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item, items);
-//set the spinners adapter to the previously created one.
-                        dropdown.setAdapter(adapter);
+                        button = (Button) popupView.findViewById(R.id.verEComenta);
 
                         // create the popup window
                         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -150,7 +141,16 @@ class DebugHelper {
                         // which view you pass in doesn't matter, it is only used for the window tolken
                         popupWindow.showAtLocation(anchorview, Gravity.CENTER, 0, 0);
 
+                        button.setOnClickListener( new View.OnClickListener() {
 
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(context,ClassifyCommentsActivity.class);
+                                intent.putExtra("id",id);
+                                intent.putExtra("cityId",cityId);
+                                context.startActivity(intent);
+                            }
+                        });
 
 
                     }
@@ -159,6 +159,10 @@ class DebugHelper {
             }
         });
 
+
+    }
+
+    public void comentaVer(){
 
     }
 

@@ -36,7 +36,7 @@
                     android:id="@+id/MyRating"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:isIndicator="false"
+                    android:isIndicator="true"
                     style="?android:attr/ratingBarStyleIndicator" />
             </LinearLayout>
 
@@ -52,11 +52,10 @@
                     android:layout_height="wrap_content"
                     android:text="Categorias" />
 
-                <Spinner
-                    android:id="@+id/spinner2"
+                <TextView
+                    android:id="@+id/cat"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    />
+                    android:layout_height="wrap_content" />
             </LinearLayout>
         </LinearLayout>
 
@@ -77,24 +76,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="100dp">
 
-                <EditText
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
             </ScrollView>
 
-            <ScrollView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
-
-                <ListView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
-            </ScrollView>
-
         </LinearLayout>
+
+        <Button
+            android:id="@+id/verEComenta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ver Mais" />
 
     </LinearLayout>
 
