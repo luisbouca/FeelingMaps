@@ -19,18 +19,22 @@ package com.app.feelingmaps;
 import android.content.Context;
 import android.content.Intent;
 
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.GoogleMap;
+
+import android.content.SharedPreferences;
 import android.graphics.Point;
+import android.preference.PreferenceManager;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.PopupWindow;
-import android.widget.Spinner;
 import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -49,9 +53,11 @@ class DebugHelper {
 
     private List<PolygonCustom> gridBlocks = new ArrayList<PolygonCustom>();
     private Button button;
+    private RequestQueue requestQueue;
 
     void drawGrid(GoogleMap map, LatLngBounds bounds, LatLngBounds screen, final Context context,final View anchorview, final String cityId) {
         cleanup();
+        requestQueue = Volley.newRequestQueue(context);
 
 
         double minY = bounds.southwest.latitude;
@@ -110,6 +116,11 @@ class DebugHelper {
                 j++;
             }
             i++;
+        }
+        if(gridBlocks.size()>0) {
+            String url = context.getResources().getString(R.string.ip) + "/api/City/" + cityId + "/" + gridBlocks.get(gridBlocks.size() - 1).id;
+            JsonObjectRequest arrReq = new JsonObjectRequest(Request.Method.GET, url, null, null, null);
+            requestQueue.add(arrReq);
         }
         map.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener(){
             public void onPolygonClick(Polygon polygon) {
@@ -173,4 +184,5 @@ class DebugHelper {
         }
         gridBlocks.clear();
     }
+
 }

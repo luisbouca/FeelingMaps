@@ -1,5 +1,8 @@
 package com.app.feelingmaps;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -48,6 +51,7 @@ public class ClassifyCommentsActivity extends AppCompatActivity {
     private RequestQueue requestQueue; // This is our requests queue to process our HTTP requests.
     private int id;
     private String cityId;
+    private String email;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +62,7 @@ public class ClassifyCommentsActivity extends AppCompatActivity {
             Bundle extras = getIntent().getExtras();
             if(extras == null) {
                 id = 0;
-                cityId = null;
+                cityId = "";
             } else {
                 id= extras.getInt("id");
                 cityId= extras.getString("cityId");
@@ -67,6 +71,7 @@ public class ClassifyCommentsActivity extends AppCompatActivity {
             id= (int) savedInstanceState.getSerializable("id");
             cityId= (String) savedInstanceState.getSerializable("cityId");
         }
+        email = GetPreferences("email");
 
         final Button rate = findViewById(R.id.bt_rate);
         final RatingBar ratingbar = findViewById(R.id.rb_rate);
@@ -99,6 +104,7 @@ public class ClassifyCommentsActivity extends AppCompatActivity {
                 params.put("id", String.valueOf(id));
                 params.put("cityId", cityId);
                 params.put("categories", categoriesString);
+                params.put("email", email);
                 JsonObjectRequest arrReq = new JsonObjectRequest(Request.Method.POST, getResources().getString(R.string.ip) + "/api/Comments", new JSONObject(params),
                         new Response.Listener<JSONObject>() {
                             @Override
@@ -215,5 +221,11 @@ public class ClassifyCommentsActivity extends AppCompatActivity {
         comments.addItemDecoration(dividerItemDecoration);
         comments.setAdapter(commentsAdapter);
         comments.setLayoutManager(commentsLayoutManager);
+    }
+
+
+    private String GetPreferences(String key){
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        return sharedPreferences.getString(key, "");
     }
 }
