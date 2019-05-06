@@ -271,6 +271,26 @@ router.get('/CityId/:cityId/ZoneId/:zoneId', function(req, res, next) {
 	
 });
 
+//GET INFO ABOUT ALL ZONES
+
+
+router.get('/CityInfo/:id', function(req, res, next) {
+
+	query="SELECT idCidadeZona, cidade_zona.idZona as idCZ, comentario FROM classificacao INNER JOIN cidade_zona ON classificacao.idCidadeZona = cidade_zona.id WHERE cidade_zona.idCidade = '"+req.params.id+"'"
+
+	
+	res.locals.connection.query(query, function (error, results, fields) {
+		if (error) throw error;
+		if(JSON.stringify(results) != "[]"){
+			console.log(query)
+			console.log(results)
+			res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
+		}else{
+			res.send(JSON.stringify({"status": 200, "error": null, "response": "Not Found"}))
+		}
+	});
+	
+});
 
 module.exports = router;
 

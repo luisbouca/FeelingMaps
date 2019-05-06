@@ -25,6 +25,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.app.feelingmaps.models.FrequenciaZonas;
 import com.app.feelingmaps.models.Ocurrencias;
 import com.google.android.gms.maps.GoogleMap;
 
@@ -74,6 +75,8 @@ class DebugHelper {
     private RatingBar ratingBar;
     private TextView categoriasView;
     private TextView comentarioView;
+    private List<FrequenciaZonas> frequenciaZonas = new ArrayList<>();
+    ;
 
     void drawGrid(GoogleMap map, LatLngBounds bounds, LatLngBounds screen, final Context context,final View anchorview, final String cityId) {
         cleanup();
@@ -142,6 +145,69 @@ class DebugHelper {
             JsonObjectRequest arrReq = new JsonObjectRequest(Request.Method.GET, url, null, null, null);
             requestQueue.add(arrReq);
         }
+
+        String url = context.getResources().getString(R.string.ip) + "/api/CityInfo/" + cityId;
+        JsonObjectRequest arrReq = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        // Check the length of our response (to see if the user has any repos)
+                        try {
+                            JSONArray locals = response.getJSONArray("response");
+                            Log.e("fds", " : "+response.toString());
+                            if (locals.getJSONObject(0).getString("idCZ") != "null" ) {
+                                for(int i=0 ; i<locals.length();i++){
+                                    FrequenciaZonas novaFrequencia = new FrequenciaZonas(locals.getJSONObject(i).getString("idCZ"),locals.getJSONObject(0).getString("comentario"));
+                                    frequenciaZonas.add(novaFrequencia);
+                                }
+                                int count = 0;
+                                for(int a = 0 ; a<gridBlocks.size();a++) {
+                                    int id = gridBlocks.get(a).id;
+                                    for(int k = 0; k < frequenciaZonas.size();k++){
+                                        if(id==Integer.valueOf(frequenciaZonas.get(k).getZona())){
+                                            count++;
+                                        }
+                                    }if(count>2){
+                                        gridBlocks.get(a).area.setFillColor(0x77FF0000);
+                                        gridBlocks.get(a).area.setStrokeColor(Color.RED);
+                                        gridBlocks.get(a).area.setStrokeWidth(3);
+                                    }
+                                    if(count<2&&count>0){
+                                        gridBlocks.get(a).area.setFillColor(0x22FF0000);
+                                        gridBlocks.get(a).area.setStrokeColor(Color.RED);
+                                        gridBlocks.get(a).area.setStrokeWidth(3);
+                                    }
+                                    count = 0;
+
+                                }
+
+
+
+                            } else {
+                                Toast.makeText(context.getApplicationContext(), "There are no record in this zone",
+                                        Toast.LENGTH_LONG).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+
+                    }
+                },
+
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // If there a HTTP error then add a note to our repo list.
+                        //setRepoListText("Error while calling REST API");
+                        Log.e("Volley", error.toString());
+                    }
+                }
+        );
+
+        requestQueue.add(arrReq);
+
+
         map.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener(){
             public void onPolygonClick(final Polygon polygon) {
                 for(int i = 0 ; i<gridBlocks.size();i++){
@@ -167,9 +233,6 @@ class DebugHelper {
                                             Log.e("fds", " : "+response.toString());
                                             if (locals.getJSONObject(0).getString("comentario") != "null" ) {
 
-                                                if(Float.parseFloat(locals.getJSONObject(0).getString("classificacao"))>=3){
-                                                    polygon.setFillColor(Color.BLUE);
-                                                }
 
                                                 categoriasView = (TextView)popupView.findViewById(R.id.cat);
                                                 comentarioView = (TextView)popupView.findViewById(R.id.coment1);
