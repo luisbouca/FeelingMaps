@@ -98,9 +98,11 @@ router.get("/City/:cityId/:numZones",(req,res,next)=>{
 			res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
 		}else{
 			console.log(results)
-			query = "Insert into cidade_zona(idZona, idCidade) Values(0,"+req.params.cityId+")"
-			for(var i = 1; i<req.params.numZones;i++){
-				query += ",("+i+","+req.params.cityId+")"
+			if(req.params.numZones>0){
+				query = "Insert into cidade_zona(idZona, idCidade) Values(0,"+req.params.cityId+")"
+				for(var i = 1; i<req.params.numZones;i++){
+					query += ",("+i+","+req.params.cityId+")"
+				}
 			}
 			res.locals.connection.query(query, function (error, results, fields) {
 				if (error) throw error;
@@ -184,13 +186,25 @@ router.get('/Name/:name/Email/:email/Password/:password', function(req, res, nex
 	});
 });
 
-
 //GET ZONE INFO POPUP
 router.get('/CityId/:cityId/ZoneId/:zoneId', function(req, res, next) {
-	query="SELECT classificacao.comentario, classificacao.classificacao, categoria.nome from classificacao INNER JOIN cidade_zona ON classificacao.idCidadeZona = cidade_zona.id INNER JOIN categoria_classificacao ON classificacao.id = categoria_classificacao.idClassificacao INNER JOIN categoria ON categoria.idCategoria = categoria_classificacao.idCategoria WHERE cidade_zona.idCidade='"+req.params.cityId+"' and cidade_zona.idZona = '"+req.params.zoneId+"'"
-console.log(query)
+
+	query="Select GROUP_CONCAT(joinedtable.comentario) as comentario, AVG(joinedtable.classificacao) as classificacao, GROUP_CONCAT(joinedtable.categoria) as categoria FROM (SELECT classificacao.comentario, classificacao.classificacao , GROUP_CONCAT(categoria.nome) as categoria from classificacao INNER JOIN cidade_zona ON classificacao.idCidadeZona = cidade_zona.id INNER JOIN categoria_classificacao ON classificacao.id = categoria_classificacao.idClassificacao INNER JOIN categoria ON categoria.idCategoria = categoria_classificacao.idCategoria WHERE cidade_zona.idCidade='"+req.params.cityId+"' and cidade_zona.idZona = '"+req.params.zoneId+"' GROUP By classificacao.id) as joinedtable"
+
+	
+	res.locals.connection.query(query, function (error, results, fields) {
+		if (error) throw error;
+		if(JSON.stringify(results) != "[]"){
+			console.log(query)
+			console.log(results)
+			res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
+		}else{
+			res.send(JSON.stringify({"status": 200, "error": null, "response": "Not Found"}))
+		}
+	});
 	
 });
+
 
 module.exports = router;
 
