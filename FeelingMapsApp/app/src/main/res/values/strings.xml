@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Feeling Maps</string>
     <string name="title_activity_maps">Map</string>
-    <string name="ip">http://192.168.42.83:85</string>
+    <string name="ip">http://192.168.42.43:85</string>
     <string name="rating_title">Classificação</string>
     <string name="comment_title">Comentário</string>
     <string name="categories_title">Categorias</string>

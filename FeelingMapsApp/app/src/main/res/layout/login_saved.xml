@@ -99,17 +99,15 @@
             <Button
                 android:id="@+id/btnSubmit2"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_height="wrap_content"
                 android:layout_below="@+id/btnSubmit"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="50dp"
-                android:background="@drawable/btn_bg"
-                android:fontFamily="sans-serif-medium"
-                android:paddingLeft="70dp"
-                android:paddingRight="70dp"
                 android:text="Login como outro utilizador"
-                android:textAllCaps="false"
+                android:background="@color/transparent"
+                android:fontFamily="sans-serif"
                 android:textColor="@color/white"
+                android:textAllCaps="true"
                 android:textSize="16sp" />
 
         </RelativeLayout>
