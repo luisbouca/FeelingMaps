@@ -21,12 +21,17 @@ import android.content.Intent;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.app.feelingmaps.models.Ocurrencias;
 import com.google.android.gms.maps.GoogleMap;
 
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.Point;
+import android.util.Log;
 import android.preference.PreferenceManager;
 import android.view.Display;
 import android.view.Gravity;
@@ -35,13 +40,25 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.PopupWindow;
+import android.widget.RatingBar;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
@@ -51,9 +68,12 @@ class DebugHelper {
 
 
 
+    private RequestQueue requestQueue; // This is our requests queue to process our HTTP requests.
     private List<PolygonCustom> gridBlocks = new ArrayList<PolygonCustom>();
     private Button button;
-    private RequestQueue requestQueue;
+    private RatingBar ratingBar;
+    private TextView categoriasView;
+    private TextView comentarioView;
 
     void drawGrid(GoogleMap map, LatLngBounds bounds, LatLngBounds screen, final Context context,final View anchorview, final String cityId) {
         cleanup();
@@ -123,18 +143,106 @@ class DebugHelper {
             requestQueue.add(arrReq);
         }
         map.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener(){
-            public void onPolygonClick(Polygon polygon) {
+            public void onPolygonClick(final Polygon polygon) {
                 for(int i = 0 ; i<gridBlocks.size();i++){
                     if(gridBlocks.get(i).equals(polygon)){
                         final int id = gridBlocks.get(i).id;
 
-                        Toast.makeText(context.getApplicationContext(), "This is my Toast message!",
-                                Toast.LENGTH_LONG).show();
 
                         LayoutInflater inflater = (LayoutInflater)
                                 context.getSystemService(LAYOUT_INFLATER_SERVICE);
-                        View popupView = inflater.inflate(R.layout.classification_map, null);
+                        final View popupView = inflater.inflate(R.layout.classification_map, null);
 
+                        String url = context.getResources().getString(R.string.ip)  + "/api/CityId/"+cityId+"/ZoneId/"+id ;
+                        Log.v("Volley",url);
+
+
+                        JsonObjectRequest arrReq = new JsonObjectRequest(Request.Method.GET, url, null,
+                                new Response.Listener<JSONObject>() {
+                                    @Override
+                                    public void onResponse(JSONObject response) {
+                                        // Check the length of our response (to see if the user has any repos)
+                                        try {
+                                            JSONArray locals = response.getJSONArray("response");
+                                            Log.e("fds", " : "+response.toString());
+                                            if (locals.getJSONObject(0).getString("comentario") != "null" ) {
+
+                                                if(Float.parseFloat(locals.getJSONObject(0).getString("classificacao"))>=3){
+                                                    polygon.setFillColor(Color.BLUE);
+                                                }
+
+                                                categoriasView = (TextView)popupView.findViewById(R.id.cat);
+                                                comentarioView = (TextView)popupView.findViewById(R.id.coment1);
+                                                ratingBar = (RatingBar)popupView.findViewById(R.id.MyRating);
+
+                                                String comentario[]=locals.getJSONObject(0).getString("comentario").split(",");
+                                                List<String> cate= Arrays.asList(locals.getJSONObject(0).getString("categoria").split(","));
+
+                                                List<Ocurrencias> ocorrencia = new ArrayList<>();
+                                                ocorrencia.add(new Ocurrencias("Entretenimento"));
+                                                ocorrencia.add(new Ocurrencias("Comercial"));
+                                                ocorrencia.add(new Ocurrencias("Lazer"));
+                                                ocorrencia.add(new Ocurrencias("Desporto"));
+
+                                                for (int j = 0; j<cate.size();j++) {
+                                                    for (int i = 0; i < ocorrencia.size(); i++) {
+                                                        if (ocorrencia.get(i).getKey().equals(cate.get(j))) {
+                                                            ocorrencia.get(i).addOccurence();
+                                                            i = ocorrencia.size();
+                                                        }
+                                                    }
+                                                }
+                                                Collections.sort(ocorrencia, new Comparator<Ocurrencias>() {
+                                                    @Override
+                                                    public int compare(Ocurrencias o1, Ocurrencias o2) {
+                                                        if (o1.getValue()>o2.getValue()){
+                                                            return -1;
+                                                        }
+                                                        if (o1.getValue()<o2.getValue()){
+                                                            return 1;
+                                                        }
+                                                        return 0;
+                                                    }
+                                                });
+
+                                                String top3 = "";
+
+                                                if(ocorrencia.get(0).getValue()!=0){
+                                                    top3 = top3 + ocorrencia.get(0).getKey();
+                                                }if (ocorrencia.get(1).getValue()!=0){
+                                                    top3 = top3 + ocorrencia.get(1).getKey();
+                                                }if (ocorrencia.get(2).getValue()!=0){
+                                                    top3 = top3 + ocorrencia.get(2).getKey();
+                                                }
+
+
+                                                comentarioView.setText(comentario[0]);
+                                                ratingBar.setRating(Float.parseFloat(locals.getJSONObject(0).getString("classificacao")));
+                                                categoriasView.setText(top3);
+
+                                            } else {
+                                                Toast.makeText(context.getApplicationContext(), "There are no record in this zone",
+                                                        Toast.LENGTH_LONG).show();
+                                            }
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+
+
+                                    }
+                                },
+
+                                new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+                                        // If there a HTTP error then add a note to our repo list.
+                                        //setRepoListText("Error while calling REST API");
+                                        Log.e("Volley", error.toString());
+                                    }
+                                }
+                        );
+
+                        requestQueue.add(arrReq);
                         button = (Button) popupView.findViewById(R.id.verEComenta);
 
                         // create the popup window
@@ -144,7 +252,7 @@ class DebugHelper {
                         display.getSize(size);
 
                         int height = (size.y)/2+250;
-                                int width =(size.x)/2+400;
+                        int width =(size.x)/2+400;
                         boolean focusable = true; // lets taps outside the popup also dismiss it
                         final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
 
