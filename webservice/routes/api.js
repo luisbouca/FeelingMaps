@@ -66,7 +66,9 @@ router.get("/Comments/:cityId/:zoneId/All",(req,res,next)=>{
 });
 
 router.get('/Email/:email/Password/:password', function(req, res, next) {
-	query="SELECT CASE WHEN EXISTS(SELECT * FROM user WHERE email like '"+req.params.email+"'  and password like '"+req.params.password+"') THEN 1 ELSE 0 END AS 'authentication'"
+	query="SELECT CASE WHEN EXISTS(SELECT * FROM user WHERE email like '"+decodeURIComponent(req.params.email)+"'  and password like '"+decodeURIComponent(req.params.password)+"') THEN 1 ELSE 0 END AS 'authentication'"
+	
+	console.log(query)
 	res.locals.connection.query(query, function (error, results, fields) {
 		if (error) throw error;
 		if(JSON.stringify(results) != "[]"){
@@ -78,7 +80,7 @@ router.get('/Email/:email/Password/:password', function(req, res, next) {
 	});
 });
 router.get('/Email/:email/Name/:name', function(req, res, next) {
-	query="SELECT CASE WHEN EXISTS(SELECT * FROM user WHERE email like '"+req.params.email+"' OR name like '"+req.params.name+"') THEN 1 ELSE 0 END AS 'registered'"
+	query="SELECT CASE WHEN EXISTS(SELECT * FROM user WHERE email like '"+decodeURIComponent(req.params.email)+"' OR name like '"+req.params.name+"') THEN 1 ELSE 0 END AS 'registered'"
 	res.locals.connection.query(query, function (error, results, fields) {
 		if (error) throw error;
 		if(JSON.stringify(results) != "[]"){
@@ -239,7 +241,7 @@ router.post("/Comments/Update",(req,res,next)=>{
 });
 
 router.get('/Name/:name/Email/:email/Password/:password', function(req, res, next) {
-	query="INSERT INTO user (name, email, password) VALUES('"+req.params.name+"', '"+req.params.email+"', '"+req.params.password+"')"
+	query="INSERT INTO user (name, email, password) VALUES('"+req.params.name+"', '"+decodeURIComponent(req.params.email)+"', '"+decodeURIComponent(req.params.password)+"')"
 
 	res.locals.connection.query(query, function (error, results, fields) {
 		if (error) throw error;
