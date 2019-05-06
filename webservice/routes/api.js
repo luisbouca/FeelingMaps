@@ -149,4 +149,13 @@ router.get('/Name/:name/Email/:email/Password/:password', function(req, res, nex
 	});
 });
 
+
+//GET ZONE INFO POPUP
+router.get('/CityId/:cityId/ZoneId/:zoneId', function(req, res, next) {
+	query="SELECT classificacao.comentario, classificacao.classificacao, categoria.nome from classificacao INNER JOIN cidade_zona ON classificacao.idCidadeZona = cidade_zona.id INNER JOIN categoria_classificacao ON classificacao.id = categoria_classificacao.idClassificacao INNER JOIN categoria ON categoria.idCategoria = categoria_classificacao.idCategoria WHERE cidade_zona.idCidade='"+req.params.cityId+"' and cidade_zona.idZona = '"+req.params.zoneId+"'"
+console.log(query)
+	
+});
+
 module.exports = router;
+

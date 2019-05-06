@@ -19,9 +19,15 @@ package com.app.feelingmaps;
 import android.content.Context;
 import android.content.Intent;
 
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.GoogleMap;
 import android.graphics.Point;
+import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -30,12 +36,18 @@ import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.PopupWindow;
+import android.widget.RatingBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,8 +59,12 @@ class DebugHelper {
 
 
 
+    private RequestQueue requestQueue; // This is our requests queue to process our HTTP requests.
     private List<PolygonCustom> gridBlocks = new ArrayList<PolygonCustom>();
     private Button button;
+    private RatingBar ratingBar;
+    private TextView categoriasView;
+    private TextView comentarioView,comentarioView2,comentarioView3;
 
     void drawGrid(GoogleMap map, LatLngBounds bounds, LatLngBounds screen, final Context context,final View anchorview, final String cityId) {
         cleanup();
@@ -113,16 +129,63 @@ class DebugHelper {
         }
         map.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener(){
             public void onPolygonClick(Polygon polygon) {
+                requestQueue = Volley.newRequestQueue(context);
                 for(int i = 0 ; i<gridBlocks.size();i++){
                     if(gridBlocks.get(i).equals(polygon)){
                         final int id = gridBlocks.get(i).id;
 
-                        Toast.makeText(context.getApplicationContext(), "This is my Toast message!",
-                                Toast.LENGTH_LONG).show();
 
                         LayoutInflater inflater = (LayoutInflater)
                                 context.getSystemService(LAYOUT_INFLATER_SERVICE);
-                        View popupView = inflater.inflate(R.layout.classification_map, null);
+                        final View popupView = inflater.inflate(R.layout.classification_map, null);
+
+                        String url = context.getResources().getString(R.string.ip)  + "/api/CityId/"+cityId+"/ZoneId/"+id ;
+                        Log.v("Volley",url);
+                        JsonObjectRequest arrReq = new JsonObjectRequest(Request.Method.GET, url, null,
+                                new Response.Listener<JSONObject>() {
+                                    @Override
+                                    public void onResponse(JSONObject response) {
+                                        // Check the length of our response (to see if the user has any repos)
+                                        try {
+                                            JSONArray locals = response.getJSONArray("response");
+                                            if (locals.length() > 0) {
+
+                                                categoriasView = (TextView)popupView.findViewById(R.id.cat);
+                                                comentarioView = (TextView)popupView.findViewById(R.id.coment1);
+                                                comentarioView2 = (TextView)popupView.findViewById(R.id.coment2);
+                                                comentarioView3 = (TextView)popupView.findViewById(R.id.coment3);
+                                                ratingBar = (RatingBar)popupView.findViewById(R.id.MyRating);
+
+
+                                            } else {
+                                                Toast.makeText(context.getApplicationContext(), "There are no record in this zone",
+                                                        Toast.LENGTH_LONG).show();
+                                            }
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+
+
+                                    }
+                                },
+
+                                new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+                                        // If there a HTTP error then add a note to our repo list.
+                                        //setRepoListText("Error while calling REST API");
+                                        Log.e("Volley", error.toString());
+                                    }
+                                }
+                        );
+
+
+
+
+
+                        Toast.makeText(context.getApplicationContext(), "This is my Toast message!",
+                                Toast.LENGTH_LONG).show();
+
 
                         button = (Button) popupView.findViewById(R.id.verEComenta);
 
@@ -133,7 +196,7 @@ class DebugHelper {
                         display.getSize(size);
 
                         int height = (size.y)/2+250;
-                                int width =(size.x)/2+400;
+                        int width =(size.x)/2+400;
                         boolean focusable = true; // lets taps outside the popup also dismiss it
                         final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
 
