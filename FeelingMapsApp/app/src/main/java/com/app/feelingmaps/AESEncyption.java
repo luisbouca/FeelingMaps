@@ -40,13 +40,12 @@ public class AESEncyption {
 
     @RequiresApi(api = Build.VERSION_CODES.FROYO)
     public static String decrypt(String textToDecrypt) throws Exception {
-
-        byte[] encryted_bytes = Base64.decode(textToDecrypt, Base64.DEFAULT);
+        byte[] encryted_bytes = Base64.decode(URLDecoder.decode(textToDecrypt,"UTF-8"), Base64.DEFAULT);
         SecretKeySpec skeySpec = new SecretKeySpec(getRaw(plainText, AESSalt), "AES");
         Cipher cipher = Cipher.getInstance(cypherInstance);
         cipher.init(Cipher.DECRYPT_MODE, skeySpec, new IvParameterSpec(initializationVector.getBytes()));
         byte[] decrypted = cipher.doFinal(encryted_bytes);
-        return URLDecoder.decode(new String(decrypted, "UTF-8"), "UTF-8");
+        return new String(decrypted, "UTF-8");
     }
 
     private static byte[] getRaw(String plainText, String salt) {

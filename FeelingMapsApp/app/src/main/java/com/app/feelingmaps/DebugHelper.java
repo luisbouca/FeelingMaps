@@ -103,10 +103,10 @@ class DebugHelper {
         double avgX =  maxX - minX;
         double clusterSizeX = (avgX * avgX)/6;
         double clusterSizeY = (avgY * avgY)/6;
-        int i = 0;
+        int i = 0,j = 0;
         int maxJ = (int) Math.round(avgX/clusterSizeY);
         for(double y = minY;y+clusterSizeY<=maxY;y=y+clusterSizeY){
-            int j = 0;
+            j = 0;
             for(double x = minX;x+clusterSizeX<=maxX;x=x+clusterSizeX){
                 PolygonOptions newPolygon = new PolygonOptions().strokeWidth(2.0f).add(new LatLng(y,x)).add(new LatLng(y+clusterSizeY,x)).add(new LatLng(y+clusterSizeY,x+clusterSizeX)).add(new LatLng(y,x+clusterSizeX));
                 newPolygon.clickable(true);
@@ -118,7 +118,7 @@ class DebugHelper {
             i++;
         }
         if(gridBlocks.size()>0) {
-            String url = context.getResources().getString(R.string.ip) + "/api/City/" + cityId + "/" + gridBlocks.get(gridBlocks.size() - 1).id;
+            String url = context.getResources().getString(R.string.ip) + "/api/City/" + cityId + "/" + ((maxJ * i) + j);
             JsonObjectRequest arrReq = new JsonObjectRequest(Request.Method.GET, url, null, null, null);
             requestQueue.add(arrReq);
         }

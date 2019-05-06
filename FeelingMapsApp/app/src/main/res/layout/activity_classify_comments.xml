@@ -27,6 +27,7 @@ tools:context=".ClassifyCommentsActivity">
             android:text="@string/rating_title"
             android:textColor="@color/common_google_signin_btn_text_dark_focused"
             android:textSize="18sp"
+            android:textStyle="bold"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -50,6 +51,7 @@ tools:context=".ClassifyCommentsActivity">
             android:text="@string/comment_title"
             android:textColor="@color/common_google_signin_btn_text_dark_focused"
             android:textSize="18sp"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/rb_rate" />
 
@@ -62,6 +64,7 @@ tools:context=".ClassifyCommentsActivity">
             android:text="@string/categories_title"
             android:textColor="@color/common_google_signin_btn_text_dark_focused"
             android:textSize="18sp"
+            android:textStyle="bold"
             app:layout_constraintStart_toEndOf="@+id/rb_rate"
             app:layout_constraintTop_toTopOf="parent" />
 

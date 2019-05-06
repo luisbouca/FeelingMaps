@@ -41,6 +41,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.MyView
         Comments comments = this.comments.get(position);
         holder.rating.setRating(comments.getRating());
         holder.comments.setText(comments.getComment());
+        holder.username.setText(comments.getUser());
 
         final CategoriesAdapter categoriesAdapter = new CategoriesAdapter(context, comments.getCategories());
         holder.categories.setHasFixedSize(true);
@@ -57,12 +58,14 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.MyView
     {
         RecyclerView categories;
         TextView comments;
+        TextView username;
         RatingBar rating;
 
         public MyViewHolder(View itemView) {
             super(itemView);
             categories = itemView.findViewById(R.id.rv_comment_item);
             comments = itemView.findViewById(R.id.tv_comment_item);
+            username = itemView.findViewById(R.id.tv_username);
             rating = itemView.findViewById(R.id.rb_comment_item);
         }
     }

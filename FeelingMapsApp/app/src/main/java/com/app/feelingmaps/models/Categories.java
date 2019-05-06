@@ -19,4 +19,12 @@ public class Categories {
     public void select() {
         selected = !selected;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof Categories))
+            return false;
+        Categories other = (Categories)obj;
+        return other.category.equals(this.category);
+    }
 }

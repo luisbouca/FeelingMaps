@@ -10,6 +10,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
@@ -52,35 +54,67 @@ public class Login extends AppCompatActivity implements View.OnClickListener{
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.login);
+        if(Boolean.parseBoolean(GetPreferences("keepsession"))){
 
-        rellay1 = (RelativeLayout) findViewById(R.id.rellay1);
-        rellay2 = (RelativeLayout) findViewById(R.id.rellay2);
+            setContentView(R.layout.login_saved);
 
-        handler.postDelayed(runnable, 2000); //2000 is the timeout for the splash
+            EditText email = findViewById(R.id.txtEmail);
+            try {
+                email.setText(AESEncyption.decrypt(GetPreferences("email")));
+                email.setKeyListener(null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-        progressBarHolder = (FrameLayout) findViewById(R.id.progressBarHolder);
+            //Setting event listener.
+            findViewById(R.id.btnSubmit).setOnClickListener(this);
+            findViewById(R.id.btnSubmit2).setOnClickListener(this);
 
-        //Setting event listener.
-        findViewById(R.id.btnSubmit).setOnClickListener(this);
-        findViewById(R.id.btnRegister).setOnClickListener(this);
+        }else{
 
-        requestQueue = Volley.newRequestQueue(this); // This setups up a new request queue which we will need to make HTTP requests.
+            setContentView(R.layout.login);
+
+            rellay1 = (RelativeLayout) findViewById(R.id.rellay1);
+            rellay2 = (RelativeLayout) findViewById(R.id.rellay2);
+
+            handler.postDelayed(runnable, 2000); //2000 is the timeout for the splash
+
+            progressBarHolder = (FrameLayout) findViewById(R.id.progressBarHolder);
+            CheckBox session = findViewById(R.id.chkWindows);
+            session.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    SavePreferences("keepsession", String.valueOf(isChecked));
+                }
+            });
+            //Setting event listener.
+            findViewById(R.id.btnSubmit).setOnClickListener(this);
+            findViewById(R.id.btnRegister).setOnClickListener(this);
+
+            requestQueue = Volley.newRequestQueue(this); // This setups up a new request queue which we will need to make HTTP requests.
+        }
     }
 
 
     @Override
     public void onClick(View v) {
-
         if(v.getId() == R.id.btnSubmit) {
-
-            OpenProgressBar();
-            new Authentication().execute();
+            if(Boolean.parseBoolean(GetPreferences("keepsession")) && !GetPreferences("email").equals("")){
+                startActivity(new Intent(Login.this, MapsActivity.class));
+            }else{
+                OpenProgressBar();
+                new Authentication().execute();
+            }
 
         }
         else if (v.getId() == R.id.btnRegister)
         {
             startActivity(new Intent(this, Register.class));
+        }
+        else if(v.getId() == R.id.btnSubmit2){
+            SavePreferences("keepsession","false");
+            SavePreferences("email","");
+            startActivity(new Intent(Login.this, Login.class));
         }
         v.startAnimation(btnClickAnimation);
     }
@@ -109,8 +143,9 @@ public class Login extends AppCompatActivity implements View.OnClickListener{
                 }
                 else
                 {
+                    email = AESEncyption.encrypt(email.toLowerCase());
                     String url = getResources().getString(R.string.ip) + "/api/Email/" + AESEncyption.encrypt(email.toLowerCase()) + "/Password/" + AESEncyption.encrypt(password);
-                    SavePreferences("email",AESEncyption.encrypt(email.toLowerCase()));
+                    SavePreferences("email",email);
 
                     JsonObjectRequest arrReq = new JsonObjectRequest(Request.Method.GET, url, null,
                             new Response.Listener<JSONObject>() {
@@ -187,7 +222,12 @@ public class Login extends AppCompatActivity implements View.OnClickListener{
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Log.e("HEYHEYHEY","   :   "+value);
         editor.putString(key, value);
-        editor.commit();
+        editor.apply();
+    }
+
+    private String GetPreferences(String key){
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        return sharedPreferences.getString(key, "");
     }
 
 }

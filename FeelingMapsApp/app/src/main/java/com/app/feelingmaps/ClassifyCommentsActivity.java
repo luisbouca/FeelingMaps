@@ -35,7 +35,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,13 +49,17 @@ public class ClassifyCommentsActivity extends AppCompatActivity {
     private List<Categories> categoriesList = new ArrayList<>();
     private List<Comments> commentsList = new ArrayList<>();
     private LinearLayoutManager categoriesLayoutManager;
-    CommentsAdapter commentsAdapter;
+    private CommentsAdapter commentsAdapter;
+    private CategoriesAdapter categoriesAdapter;
     private LinearLayoutManager commentsLayoutManager;
     private static final int MY_SOCKET_TIMEOUT_MS = 20000;
     private RequestQueue requestQueue; // This is our requests queue to process our HTTP requests.
     private int id;
     private String cityId;
     private String email;
+    private Boolean toUpdate=false;
+    private int categoriesCounter=0;
+    private int idClassificacao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,16 +108,27 @@ public class ClassifyCommentsActivity extends AppCompatActivity {
                 }
                 HashMap<String, String> params = new HashMap<String, String>();
                 params.put("rating", String.valueOf(rating));
-                params.put("comment", comment);
+                try {
+                    params.put("comment", URLEncoder.encode(comment,"UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
                 params.put("id", String.valueOf(id));
                 params.put("cityId", cityId);
                 params.put("categories", categoriesString);
                 params.put("email", email);
-                JsonObjectRequest arrReq = new JsonObjectRequest(Request.Method.POST, getResources().getString(R.string.ip) + "/api/Comments", new JSONObject(params),
+
+                String url = getResources().getString(R.string.ip) +"/api/Comments";
+                if(toUpdate){
+                    params.put("idComment", String.valueOf(idClassificacao));
+                    url +="/Update";
+                }
+                JsonObjectRequest arrReq = new JsonObjectRequest(Request.Method.POST, url, new JSONObject(params),
                         new Response.Listener<JSONObject>() {
                             @Override
                             public void onResponse(JSONObject response) {
                                 // Check the length of our response (to see if the user has any repos)
+                                Toast.makeText(getApplicationContext(),"Classificação efetuada",Toast.LENGTH_SHORT).show();
                                 try {
                                     JSONArray locals = response.getJSONArray("response");
                                     if (locals.length() > 0) {
@@ -131,6 +150,7 @@ public class ClassifyCommentsActivity extends AppCompatActivity {
                             public void onErrorResponse(VolleyError error) {
                                 // If there a HTTP error then add a note to our repo list.
                                 //setRepoListText("Error while calling REST API");
+                                Toast.makeText(getApplicationContext(),"Erro no envio da Classificação",Toast.LENGTH_SHORT).show();
                                 Log.e("Volley", error.toString());
                             }
                         }
@@ -146,12 +166,40 @@ public class ClassifyCommentsActivity extends AppCompatActivity {
                         // Check the length of our response (to see if the user has any repos)
                         try {
                             JSONArray comments = response.getJSONArray("response");
-                            List<Comments> commentsList = new ArrayList<>();
                             if (comments.length() > 0) {
+                                commentsList.clear();
                                 for (int idx = 0 ; idx<comments.length();idx++){
+                                    try {
+                                        if(comments.getJSONObject(idx).getString("email").equals(URLDecoder.decode(GetPreferences("email"),"UTF-8"))){
+                                            toUpdate=true;
+                                            idClassificacao = comments.getJSONObject(idx).getInt("id");
+                                            try {
+                                                ratingbar.setRating(comments.getJSONObject(idx).getLong("classificacao"));
+                                                commentBox.setText(URLDecoder.decode(comments.getJSONObject(idx).getString("comentario"),"UTF-8"));
+                                                String[] categories = comments.getJSONObject(idx).getString("categoria").split(",");
+                                                categoriesCounter = categories.length;
+                                                for (int idx2 = 0; idx2<categories.length;idx2++){
+                                                    categoriesList.get(categoriesList.indexOf(new Categories(categories[idx2]))).select();
+                                                }
+                                                categoriesAdapter.notifyDataSetChanged();
+                                            } catch (UnsupportedEncodingException e) {
+                                                e.printStackTrace();
+                                            }
 
+                                        }else{
+                                            List<String> categorias = Arrays.asList(comments.getJSONObject(idx).getString("categoria").split(","));
+                                            Comments comment = null;
+                                            try {
+                                                comment = new Comments(comments.getJSONObject(idx).getLong("classificacao"),categorias, URLDecoder.decode(comments.getJSONObject(idx).getString("comentario"),"UTF-8"),comments.getJSONObject(idx).getString("name"));
+                                            } catch (UnsupportedEncodingException e) {
+                                                e.printStackTrace();
+                                            }
+                                            commentsList.add(comment);
+                                        }
+                                    } catch (UnsupportedEncodingException e) {
+                                        e.printStackTrace();
+                                    }
                                 }
-
                                 commentsAdapter.notifyDataSetChanged();
                             } else {
                                 // The user didn't have any repos.
@@ -185,7 +233,7 @@ public class ClassifyCommentsActivity extends AppCompatActivity {
         categoriesList.add(new Categories("Comercial"));
         categoriesList.add(new Categories("Lazer"));
         categoriesList.add(new Categories("Desporto"));
-        final CategoriesAdapter categoriesAdapter = new CategoriesAdapter(this, categoriesList);
+        categoriesAdapter = new CategoriesAdapter(this, categoriesList);
 
         categoriesLayoutManager = new LinearLayoutManager(this);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(categories.getContext(),categoriesLayoutManager.getOrientation());
@@ -198,7 +246,22 @@ public class ClassifyCommentsActivity extends AppCompatActivity {
         categories.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), categories, new RecyclerTouchListener.ClickListener() {
             @Override
             public void onClick(View view, int position) {
-                categoriesList.get(position).select();
+                if(categoriesCounter >=3){
+                    if (categoriesList.get(position).isSelected()){
+                        categoriesList.get(position).select();
+                        categoriesCounter--;
+                    }else{
+                        Toast.makeText(getApplicationContext(),"Só pode selecionar 3 Categorias",Toast.LENGTH_SHORT).show();
+                    }
+                }else{
+                    if (categoriesList.get(position).isSelected()){
+                        categoriesList.get(position).select();
+                        categoriesCounter--;
+                    }else{
+                        categoriesList.get(position).select();
+                        categoriesCounter++;
+                    }
+                }
                 categoriesAdapter.notifyDataSetChanged();
             }
 
