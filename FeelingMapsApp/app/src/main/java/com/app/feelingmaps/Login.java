@@ -143,8 +143,8 @@ public class Login extends AppCompatActivity implements View.OnClickListener{
                 }
                 else
                 {
-                    email = AESEncyption.encrypt(email.toLowerCase());
-                    String url = getResources().getString(R.string.ip) + "/api/Email/" + AESEncyption.encrypt(email.toLowerCase()) + "/Password/" + AESEncyption.encrypt(password);
+                    email = AESEncyption.encrypt(email.toLowerCase().replace(" ", ""));
+                    String url = getResources().getString(R.string.ip) + "/api/Email/" + email + "/Password/" + AESEncyption.encrypt(password);
                     SavePreferences("email",email);
 
                     JsonObjectRequest arrReq = new JsonObjectRequest(Request.Method.GET, url, null,
