@@ -90,36 +90,18 @@ router.get('/Email/:email/Name/:name', function(req, res, next) {
 })
 
 router.get("/City/:cityId/:numZones",(req,res,next)=>{
-	query = ""
-	for(var i = 0; i<req.params.numZones;i++){
-		query += "Insert into cidade_zona(idZona, idCidade) Values("+i+","+req.params.cityId+");"
-	}
+	query = "Select * from cidade_zona where idZona='0' and idCidade='"+req.params.cityId+"'";
 	res.locals.connection.query(query, function (error, results, fields) {
 		if (error) throw error;
 		if(JSON.stringify(results) != "[]"){
 			console.log(query)
 			res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
 		}else{
-			res.send(JSON.stringify({"status": 200, "error": null, "response": "Not Found"}))
-		}
-	})
-})
-router.post("/Comments/",(req,res,next)=>{
-
-	console.log(req.body)
-	query="Insert Into classificacao (idCidadeZona,idUser,comentario,classificacao) Values((Select id from cidade_zona where idCidade="+req.body.cityId+" and idzona="+req.body.id+"),"+req.body.user+","+req.body.comment+","+req.body.rating+")"
-	res.locals.connection.query(query, function (error, results, fields) {
-		if (error) throw error;
-		if(JSON.stringify(results) != "[]"){
-			console.log(query)
-			res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
-			//get classification id
-			//get all the categories
-			//separate categories
-			//for to add inserts for all categories
-
-			
-			/*query="Insert Into classificacao (idCidadeZona,idUser,comentario,classificacao) Values((Select id from cidade_zona where idCidade="+req.body.cityId+" and idzona="+req.body.id+"),"+req.body.user+","+req.body.comment+","+req.body.rating+")"
+			console.log(results)
+			query = "Insert into cidade_zona(idZona, idCidade) Values(0,"+req.params.cityId+")"
+			for(var i = 1; i<req.params.numZones;i++){
+				query += ",("+i+","+req.params.cityId+")"
+			}
 			res.locals.connection.query(query, function (error, results, fields) {
 				if (error) throw error;
 				if(JSON.stringify(results) != "[]"){
@@ -128,7 +110,60 @@ router.post("/Comments/",(req,res,next)=>{
 				}else{
 					res.send(JSON.stringify({"status": 200, "error": null, "response": "Not Found"}))
 				}
-			});*/
+			})
+		}
+	})
+})
+router.post("/Comments/",(req,res,next)=>{
+
+	console.log(req.body)
+	query="Insert Into classificacao (idCidadeZona,idUser,comentario,classificacao) Values((Select id from cidade_zona where idCidade="+req.body.cityId+" and idzona="+req.body.id+"),(Select id from user where email LIKE '"+decodeURIComponent(req.body.email)+"'),'"+req.body.comment+"','"+req.body.rating+"')"
+	res.locals.connection.query(query, function (error, results, fields) {
+		if (error) throw error;
+		if(JSON.stringify(results) != "[]"){
+			console.log(query)
+			//get classification id
+			id = results.insertId
+			categories = req.body.categories.split(",")
+			if(categories.length>0){
+				if(categories.length == 1){
+					query = "Select idCategoria from categoria where nome in('"+categories[0]+"')"
+				}else{
+					query = "Select idCategoria from categoria where nome in('"+categories[0]+"'"
+					for(var i = 1; i<categories.length;i++){
+						query += ",'"+categories[i]+"'"
+					}
+					query += ")"
+				}
+				res.locals.connection.query(query, function (error, results, fields) {
+					if (error) throw error;
+					if(JSON.stringify(results) != "[]"){
+						console.log(query)
+						if(results.length>0){
+							if(results.length == 1){
+								query = "Insert Into categoria_classificacao (idCategoria,idClassificacao) Values("+results[0].idCategoria+","+id+")"
+							}else{
+								query = "Insert Into categoria_classificacao (idCategoria,idClassificacao) Values("+results[0].idCategoria+","+id+")"
+								for(var i = 1; i<results.length;i++){
+									query += ",("+results[i].idCategoria+","+id+")"
+								}
+							}
+							res.locals.connection.query(query, function (error, results, fields) {
+								if (error) throw error;
+								if(JSON.stringify(results) != "[]"){
+									console.log(query)
+									res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
+								}else{
+									res.send(JSON.stringify({"status": 200, "error": null, "response": "Not Found"}))
+								}
+							});
+						}
+						
+					}else{
+						res.send(JSON.stringify({"status": 200, "error": null, "response": "Not Found"}))
+					}
+				});
+			}
 		}else{
 			res.send(JSON.stringify({"status": 200, "error": null, "response": "Not Found"}))
 		}

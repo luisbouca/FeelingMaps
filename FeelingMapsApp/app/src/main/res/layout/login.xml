@@ -60,6 +60,7 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="sans-serif-light"
                         android:text="E-mail"
+                        android:inputType="textEmailAddress"
                         android:textAllCaps="true"
                         android:textColor="@color/white"
                         android:textSize="15sp" />

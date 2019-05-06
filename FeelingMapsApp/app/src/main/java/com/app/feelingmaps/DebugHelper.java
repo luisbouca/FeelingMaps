@@ -26,14 +26,16 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.GoogleMap;
+
+import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.util.Log;
+import android.preference.PreferenceManager;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.PopupWindow;
 import android.widget.RatingBar;
@@ -68,6 +70,7 @@ class DebugHelper {
 
     void drawGrid(GoogleMap map, LatLngBounds bounds, LatLngBounds screen, final Context context,final View anchorview, final String cityId) {
         cleanup();
+        requestQueue = Volley.newRequestQueue(context);
 
 
         double minY = bounds.southwest.latitude;
@@ -127,9 +130,13 @@ class DebugHelper {
             }
             i++;
         }
+        if(gridBlocks.size()>0) {
+            String url = context.getResources().getString(R.string.ip) + "/api/City/" + cityId + "/" + gridBlocks.get(gridBlocks.size() - 1).id;
+            JsonObjectRequest arrReq = new JsonObjectRequest(Request.Method.GET, url, null, null, null);
+            requestQueue.add(arrReq);
+        }
         map.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener(){
             public void onPolygonClick(Polygon polygon) {
-                requestQueue = Volley.newRequestQueue(context);
                 for(int i = 0 ; i<gridBlocks.size();i++){
                     if(gridBlocks.get(i).equals(polygon)){
                         final int id = gridBlocks.get(i).id;
@@ -236,4 +243,5 @@ class DebugHelper {
         }
         gridBlocks.clear();
     }
+
 }

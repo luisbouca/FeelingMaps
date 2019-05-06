@@ -1,9 +1,11 @@
 package com.app.feelingmaps;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -107,7 +109,8 @@ public class Login extends AppCompatActivity implements View.OnClickListener{
                 }
                 else
                 {
-                    String url = getResources().getString(R.string.ip) + "/api/Email/" + AESEncyption.encrypt(email.toLowerCase()) + "/Password/" + AESEncyption.encrypt(password);;
+                    String url = getResources().getString(R.string.ip) + "/api/Email/" + AESEncyption.encrypt(email.toLowerCase()) + "/Password/" + AESEncyption.encrypt(password);
+                    SavePreferences("email",AESEncyption.encrypt(email.toLowerCase()));
 
                     JsonObjectRequest arrReq = new JsonObjectRequest(Request.Method.GET, url, null,
                             new Response.Listener<JSONObject>() {
@@ -116,6 +119,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener{
                                     try {
                                         CloseProgressBar();
                                         Boolean redirect = Integer.parseInt((response.getJSONArray("response")).getJSONObject(0).optString("authentication")) > 0 ? true:false;
+
 
                                         if(redirect)
                                             startActivity(new Intent(Login.this, MapsActivity.class));
@@ -175,6 +179,15 @@ public class Login extends AppCompatActivity implements View.OnClickListener{
         progressBarHolder.setAnimation(outAnimation);
         progressBarHolder.setVisibility(View.GONE);
         progressBarHolder.clearAnimation();
+    }
+
+    private void SavePreferences(String key, String value){
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Log.e("HEYHEYHEY","   :   "+value);
+        editor.putString(key, value);
+        editor.commit();
     }
 
 }
