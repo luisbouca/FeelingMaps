@@ -33,6 +33,7 @@ import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.PlaceDetectionClient;
@@ -71,6 +72,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LatLngBounds SCREEN_BOUNDS = new LatLngBounds(new LatLng(0,0),new LatLng(1.0,1.0));
     private String currentAddress = "";
     private String cityId = "";
+    private String oldCity="", newCity="";
+    Marker markerName;
 
 
 
@@ -140,8 +143,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onMyLocationChange(Location arg0) {
                 // TODO Auto-generated method stub
-
-                mMap.addMarker(new MarkerOptions().position(new LatLng(arg0.getLatitude(), arg0.getLongitude())).title("It's Me!"));
+                //mMap.clear();
+                if(markerName!=null){
+                    markerName.remove();
+                }
+                markerName = mMap.addMarker(new MarkerOptions().position(new LatLng(arg0.getLatitude(), arg0.getLongitude())).title("It's Me!"));
+                //mMap.addMarker(new MarkerOptions().position(new LatLng(arg0.getLatitude(), arg0.getLongitude())).title("It's Me!"));
             }
         });
         //final LatLngBounds DUBAI_BOUNDS = new LatLngBounds(new LatLng(24.5908366068, 54.84375), new LatLng(25.3303729706, 55.6835174561));
@@ -230,9 +237,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         builder.append(addressStr);
                         builder.append(" ");
                     }
+                    newCity = address1.getAdminArea();
+
 
                     String finalAddress = builder.toString(); //This is the complete address.
-                    if(!currentAddress.equals(finalAddress)) {
+                    if(!newCity.equals(oldCity)) {
+                        oldCity=newCity;
+                        Toast.makeText(context.getApplicationContext(), "CURRENT "+newCity + "OLD "+oldCity,
+                                Toast.LENGTH_LONG).show();
                         cityId = "";
                         currentAddress = finalAddress;
                         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude()), 15);

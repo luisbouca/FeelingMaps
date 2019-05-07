@@ -76,7 +76,7 @@ class DebugHelper {
     private TextView categoriasView;
     private TextView comentarioView;
     private List<FrequenciaZonas> frequenciaZonas = new ArrayList<>();
-    ;
+    private int count = 0;
 
     void drawGrid(GoogleMap map, LatLngBounds bounds, LatLngBounds screen, final Context context,final View anchorview, final String cityId) {
         cleanup();
@@ -160,14 +160,14 @@ class DebugHelper {
                                     FrequenciaZonas novaFrequencia = new FrequenciaZonas(locals.getJSONObject(i).getString("idCZ"),locals.getJSONObject(0).getString("comentario"));
                                     frequenciaZonas.add(novaFrequencia);
                                 }
-                                int count = 0;
                                 for(int a = 0 ; a<gridBlocks.size();a++) {
                                     int id = gridBlocks.get(a).id;
                                     for(int k = 0; k < frequenciaZonas.size();k++){
                                         if(id==Integer.valueOf(frequenciaZonas.get(k).getZona())){
                                             count++;
                                         }
-                                    }if(count>2){
+                                    }
+                                    if(count>2){
                                         gridBlocks.get(a).area.setFillColor(0x77FF0000);
                                         gridBlocks.get(a).area.setStrokeColor(Color.RED);
                                         gridBlocks.get(a).area.setStrokeWidth(3);
@@ -182,7 +182,7 @@ class DebugHelper {
                                 }
 
 
-
+                            frequenciaZonas.clear();
                             } else {
                                 Toast.makeText(context.getApplicationContext(), "There are no record in this zone",
                                         Toast.LENGTH_LONG).show();
