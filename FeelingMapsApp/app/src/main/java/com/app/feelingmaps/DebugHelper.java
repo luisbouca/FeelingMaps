@@ -273,9 +273,9 @@ class DebugHelper {
                                                 if(ocorrencia.get(0).getValue()!=0){
                                                     top3 = top3 + ocorrencia.get(0).getKey();
                                                 }if (ocorrencia.get(1).getValue()!=0){
-                                                    top3 = top3 + ocorrencia.get(1).getKey();
+                                                    top3 = top3 + ", " + ocorrencia.get(1).getKey();
                                                 }if (ocorrencia.get(2).getValue()!=0){
-                                                    top3 = top3 + ocorrencia.get(2).getKey();
+                                                    top3 = top3 + ", " + ocorrencia.get(2).getKey();
                                                 }
 
 
