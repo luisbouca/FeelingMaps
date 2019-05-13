@@ -160,6 +160,7 @@ class DebugHelper {
                                     FrequenciaZonas novaFrequencia = new FrequenciaZonas(locals.getJSONObject(i).getString("idCZ"),locals.getJSONObject(0).getString("comentario"));
                                     frequenciaZonas.add(novaFrequencia);
                                 }
+                                int max = (int) ((frequenciaZonas.size()/100)+1);
                                 for(int a = 0 ; a<gridBlocks.size();a++) {
                                     int id = gridBlocks.get(a).id;
                                     for(int k = 0; k < frequenciaZonas.size();k++){
@@ -167,12 +168,15 @@ class DebugHelper {
                                             count++;
                                         }
                                     }
-                                    if(count>2){
+                                    if(count>=max*2){
                                         gridBlocks.get(a).area.setFillColor(0x77FF0000);
                                         gridBlocks.get(a).area.setStrokeColor(Color.RED);
                                         gridBlocks.get(a).area.setStrokeWidth(3);
-                                    }
-                                    if(count<2&&count>0){
+                                    }else if(count>=max){
+                                        gridBlocks.get(a).area.setFillColor(0x44FF0000);
+                                        gridBlocks.get(a).area.setStrokeColor(Color.RED);
+                                        gridBlocks.get(a).area.setStrokeWidth(3);
+                                    }else if(count>0){
                                         gridBlocks.get(a).area.setFillColor(0x22FF0000);
                                         gridBlocks.get(a).area.setStrokeColor(Color.RED);
                                         gridBlocks.get(a).area.setStrokeWidth(3);

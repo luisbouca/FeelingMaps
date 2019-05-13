@@ -31,6 +31,8 @@ public class Login extends AppCompatActivity implements View.OnClickListener{
 
     RelativeLayout rellay1, rellay2;
 
+    Boolean keepSession = false;
+
     Handler handler = new Handler();
     Runnable runnable = new Runnable() {
         @Override
@@ -54,7 +56,8 @@ public class Login extends AppCompatActivity implements View.OnClickListener{
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        if(Boolean.parseBoolean(GetPreferences("keepsession"))){
+        keepSession = Boolean.parseBoolean(GetPreferences("keepsession"));
+        if(keepSession){
 
             setContentView(R.layout.login_saved);
 
@@ -84,7 +87,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener{
             session.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    SavePreferences("keepsession", String.valueOf(isChecked));
+                    keepSession = isChecked;
                 }
             });
             //Setting event listener.
@@ -145,8 +148,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener{
                 {
                     email = AESEncyption.encrypt(email.toLowerCase().replace(" ", ""));
                     String url = getResources().getString(R.string.ip) + "/api/Email/" + email + "/Password/" + AESEncyption.encrypt(password);
-                    SavePreferences("email",email);
-
+                    final String finalEmail = email;
                     JsonObjectRequest arrReq = new JsonObjectRequest(Request.Method.GET, url, null,
                             new Response.Listener<JSONObject>() {
                                 @Override
@@ -156,10 +158,13 @@ public class Login extends AppCompatActivity implements View.OnClickListener{
                                         Boolean redirect = Integer.parseInt((response.getJSONArray("response")).getJSONObject(0).optString("authentication")) > 0 ? true:false;
 
 
-                                        if(redirect)
+                                        if(redirect) {
+                                            SavePreferences("email", finalEmail);
+                                            SavePreferences("keepsession", String.valueOf(keepSession));
                                             startActivity(new Intent(Login.this, MapsActivity.class));
-                                        else
+                                        }else {
                                             DisplayToastMsg("Atenção, o email ou a password incorretos!");
+                                        }
 
                                     } catch (JSONException e) {
                                         e.printStackTrace();
