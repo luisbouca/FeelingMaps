@@ -243,8 +243,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     String finalAddress = builder.toString(); //This is the complete address.
                     if(!newCity.equals(oldCity)) {
                         oldCity=newCity;
-                        Toast.makeText(context.getApplicationContext(), "CURRENT "+newCity + "OLD "+oldCity,
-                                Toast.LENGTH_LONG).show();
                         cityId = "";
                         currentAddress = finalAddress;
                         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude()), 15);
